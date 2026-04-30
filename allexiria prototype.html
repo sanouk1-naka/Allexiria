@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Allexiria – Smart Allergy Guardian</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EF;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE8;
+    --border: #E5E0D8;
+    --text: #1A1714;
+    --text2: #6B645A;
+    --text3: #9E9489;
+    --accent: #2D6A4F;
+    --accent-light: #E8F5EE;
+    --danger: #C1121F;
+    --danger-light: #FDECEA;
+    --warn: #D4800A;
+    --warn-light: #FFF3DC;
+    --safe: #2D6A4F;
+    --safe-light: #E8F5EE;
+    --blue: #1A5276;
+    --blue-light: #EBF5FB;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #D8D4CC;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  /* Phone frame */
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: var(--bg);
+    border-radius: 48px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.35), inset 0 0 0 1.5px rgba(255,255,255,0.3);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-notch {
+    width: 126px;
+    height: 34px;
+    background: #0a0a0a;
+    border-radius: 0 0 20px 20px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .screen {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Screen pages */
+  .page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    scrollbar-width: none;
+  }
+  .page::-webkit-scrollbar { display: none; }
+  .page.active { display: flex; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 20px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: all 0.2s;
+  }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-item.active .nav-label { color: var(--accent); font-weight: 600; }
+  .nav-icon { font-size: 20px; color: var(--text3); transition: 0.2s; }
+  .nav-label { font-size: 10px; color: var(--text3); transition: 0.2s; }
+
+  /* Header */
+  .page-header {
+    padding: 16px 20px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .page-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge.danger { background: var(--danger-light); color: var(--danger); }
+  .badge.warn { background: var(--warn-light); color: var(--warn); }
+  .badge.safe { background: var(--safe-light); color: var(--safe); }
+  .badge.blue { background: var(--blue-light); color: var(--blue); }
+
+  /* Scrollable content area */
+  .page-content {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .page-content::-webkit-scrollbar { display: none; }
+
+  /* ═══════════════════════════════════════ LOGIN ═══ */
+  #page-login {
+    background: linear-gradient(160deg, #1A3C2E 0%, #2D6A4F 55%, #4A9970 100%);
+  }
+  .login-logo {
+    padding: 48px 32px 32px;
+    text-align: center;
+  }
+  .login-logo-icon {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 16px;
+    backdrop-filter: blur(10px);
+  }
+  .login-logo h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .login-logo p { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 4px; }
+
+  .login-card {
+    margin: 0 20px;
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .role-tabs {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 2px;
+    margin-bottom: 20px;
+  }
+  .role-tab {
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: 9px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .role-tab.active {
+    background: white;
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .input-group { margin-bottom: 14px; }
+  .input-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .input-field {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .login-footer { text-align: center; padding: 20px; }
+  .login-footer p { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+  /* ═══════════════════════════════════════ HOME ════ */
+  .home-header {
+    background: linear-gradient(135deg, #1A3C2E, #2D6A4F);
+    padding: 20px 20px 28px;
+    color: white;
+  }
+  .home-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .home-greeting { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .home-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .home-avatar {
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+  }
+  .alert-banner {
+    background: rgba(193,18,31,0.9);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .alert-banner-icon { font-size: 24px; flex-shrink: 0; }
+  .alert-banner-text h3 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .alert-banner-text p { font-size: 11px; color: rgba(255,255,255,0.8); }
+
+  .quick-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .tile {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+  }
+  .tile:active { transform: scale(0.97); border-color: var(--accent); }
+  .tile-icon { font-size: 26px; margin-bottom: 8px; }
+  .tile-label { font-size: 14px; font-weight: 600; color: var(--text); }
+  .tile-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .alert-feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .alert-feed-item:last-child { border-bottom: none; }
+  .alert-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .dot-danger { background: var(--danger); }
+  .dot-warn { background: var(--warn); }
+  .dot-safe { background: var(--safe); }
+  .alert-feed-text { flex: 1; }
+  .alert-feed-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .alert-feed-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ═══════════════════════════════════════ PROFILE ═══ */
+  .profile-hero {
+    background: linear-gradient(135deg, #1A3C2E, #2D6A4F);
+    padding: 24px 20px 32px;
+    color: white;
+    text-align: center;
+  }
+  .profile-avatar {
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 12px;
+    border: 3px solid rgba(255,255,255,0.4);
+  }
+  .profile-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; }
+  .profile-id { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .profile-tags { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { font-size: 13px; color: var(--text2); }
+  .info-val { font-size: 13px; font-weight: 500; color: var(--text); text-align: right; max-width: 55%; }
+
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .metric-box {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .metric-val { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: var(--text); }
+  .metric-unit { font-size: 10px; color: var(--text3); }
+  .metric-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .allergy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px;
+  }
+  .allergy-chip.critical { background: var(--danger-light); color: var(--danger); border: 1.5px solid #FBCDD0; }
+  .allergy-chip.moderate { background: var(--warn-light); color: var(--warn); border: 1.5px solid #FFE0A3; }
+
+  .med-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .med-item:last-child { margin-bottom: 0; }
+  .med-icon { font-size: 22px; width: 36px; text-align: center; }
+  .med-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .med-dose { font-size: 11px; color: var(--text2); }
+  .med-critical { background: var(--danger-light); }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-item:last-child { border-bottom: none; }
+  .contact-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .contact-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .contact-rel { font-size: 11px; color: var(--text2); }
+  .contact-phone { font-size: 12px; color: var(--accent); font-weight: 500; margin-left: auto; }
+
+  /* ═══════════════════════════════════════ MENU ════ */
+  .menu-date-bar {
+    background: var(--surface);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .menu-date { font-size: 14px; font-weight: 600; color: var(--text); }
+  .menu-date-nav { font-size: 18px; color: var(--text2); cursor: pointer; padding: 4px 8px; }
+
+  .safe-summary {
+    background: var(--accent);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: white;
+  }
+  .safe-summary-icon { font-size: 28px; }
+  .safe-summary h3 { font-size: 14px; font-weight: 700; }
+  .safe-summary p { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+  .menu-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    padding: 4px 0 8px;
+  }
+
+  .dish-card {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 8px;
+    border-left: 4px solid transparent;
+  }
+  .dish-card.danger { border-left-color: var(--danger); background: #FFFAFA; }
+  .dish-card.warn { border-left-color: var(--warn); background: #FFFDF7; }
+  .dish-card.safe { border-left-color: var(--safe); }
+  .dish-emoji { font-size: 28px; flex-shrink: 0; }
+  .dish-info { flex: 1; }
+  .dish-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .dish-desc { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+  .dish-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .dish-tag {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .dish-tag.danger { background: var(--danger-light); color: var(--danger); }
+  .dish-tag.warn { background: var(--warn-light); color: var(--warn); }
+  .dish-tag.safe { background: var(--safe-light); color: var(--safe); }
+  .dish-status { font-size: 18px; margin-left: auto; flex-shrink: 0; margin-top: 2px; }
+
+  /* ═══════════════════════════════════════ SCAN ════ */
+  .scan-viewfinder {
+    margin: 20px;
+    border-radius: 20px;
+    background: #0a0a0a;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .scan-corners::before,
+  .scan-corners::after {
+    content: '';
+    position: absolute;
+    width: 30px; height: 30px;
+    border: 3px solid var(--accent);
+  }
+  .scan-corners::before { top: 12px; left: 12px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+  .scan-corners::after { bottom: 12px; right: 12px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+  .scan-center { text-align: center; color: white; }
+  .scan-center p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 8px; }
+  .scan-line {
+    position: absolute;
+    left: 20px; right: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scanLine 2s ease-in-out infinite;
+  }
+  @keyframes scanLine {
+    0% { top: 30px; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { top: 210px; opacity: 0; }
+  }
+
+  .scan-result {
+    margin: 0 20px;
+    border-radius: var(--radius);
+    padding: 18px;
+    display: none;
+  }
+  .scan-result.active { display: block; }
+  .scan-result.danger { background: var(--danger-light); border: 2px solid #FBCDD0; }
+  .scan-result.safe { background: var(--safe-light); border: 2px solid #B8E4CD; }
+  .scan-result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .scan-result-icon { font-size: 28px; }
+  .scan-result-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .scan-result-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .btn-alert {
+    width: 100%;
+    padding: 14px;
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-safe {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .scan-history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .scan-dish-icon { font-size: 22px; }
+  .scan-dish-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .scan-dish-time { font-size: 11px; color: var(--text3); }
+
+  /* ═══════════════════════════════════════ HISTORY ═══ */
+  .history-day {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+  .history-meal {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .history-meal-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    width: 45px;
+    flex-shrink: 0;
+  }
+  .history-meal-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+
+  .alert-log-item {
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border-left: 4px solid var(--danger);
+  }
+  .alert-log-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .alert-log-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .alert-log-time { font-size: 11px; color: var(--text3); }
+  .alert-log-desc { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .alert-log-notif { font-size: 11px; color: var(--accent); margin-top: 6px; font-weight: 500; }
+
+  /* ═══════════════════════════════════════ NOTIF ════ */
+  .notif-item {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .notif-item.unread { border-left: 3px solid var(--accent); }
+  .notif-icon { font-size: 22px; flex-shrink: 0; }
+  .notif-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .notif-body { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+  .notif-time { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+  /* ═══════════════════════════════════════ NURSE ════ */
+  .nurse-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .nurse-stat {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .nurse-stat-val { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--text); }
+  .nurse-stat-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .nurse-stat.alert-stat .nurse-stat-val { color: var(--danger); }
+
+  .risk-table-header {
+    display: grid;
+    grid-template-columns: 1fr 60px 70px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .risk-row {
+    display: grid;
+    grid-template-columns: 1fr 60px 70px;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .risk-student-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .risk-student-class { font-size: 11px; color: var(--text3); }
+  .risk-level { font-size: 12px; font-weight: 600; text-align: center; }
+  .risk-level.high { color: var(--danger); }
+  .risk-level.med { color: var(--warn); }
+  .risk-level.low { color: var(--safe); }
+  .risk-action { text-align: right; }
+  .risk-action-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+
+  .quick-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quick-action {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border);
+  }
+  .quick-action:active { border-color: var(--accent); transform: scale(0.97); }
+  .quick-action-icon { font-size: 24px; margin-bottom: 6px; }
+  .quick-action-label { font-size: 12px; font-weight: 600; color: var(--text); }
+
+  /* ═══════════════════════════════════════ SETTINGS ═══ */
+  .settings-section { margin-bottom: 6px; }
+  .settings-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    padding: 10px 16px 6px;
+  }
+  .settings-item {
+    background: var(--surface);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-item:first-of-type { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+  .settings-item:last-of-type { border-radius: 0 0 var(--radius-sm) var(--radius-sm); border-bottom: none; }
+  .settings-item:only-of-type { border-radius: var(--radius-sm); }
+  .settings-icon { font-size: 18px; width: 28px; text-align: center; }
+  .settings-label { flex: 1; font-size: 14px; color: var(--text); }
+  .settings-value { font-size: 13px; color: var(--text3); }
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--accent);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle.off { background: var(--border); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; right: 3px;
+    transition: right 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle.off::after { right: auto; left: 3px; }
+
+  /* App name label */
+  .app-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ═══════════════════════════════════════ NURSE HEADER ════ */
+  .nurse-header {
+    background: linear-gradient(135deg, #1A2E5A, #2563EB);
+    padding: 20px 20px 24px;
+    color: white;
+  }
+  .nurse-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .nurse-role-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .nurse-name { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-top: 8px; }
+  .nurse-status { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="screen">
+
+      <!-- ═══════════ LOGIN ═══════════ -->
+      <div id="page-login" class="page active">
+        <div class="login-logo">
+          <div class="login-logo-icon">🛡️</div>
+          <h1>Allexiria</h1>
+          <p>Smart Allergy Guardian for Schools</p>
+        </div>
+        <div class="login-card">
+          <div class="role-tabs">
+            <div class="role-tab active" onclick="setRole(this,'student')">👨‍🎓 Student</div>
+            <div class="role-tab" onclick="setRole(this,'nurse')">🩺 Nurse</div>
+            <div class="role-tab" onclick="setRole(this,'parent')">👨‍👩‍👧 Parent</div>
+          </div>
+          <div class="input-group">
+            <div class="input-label">Student ID / Email</div>
+            <input class="input-field" type="text" placeholder="e.g. STU-2024-1847" value="STU-2024-1847">
+          </div>
+          <div class="input-group">
+            <div class="input-label">Password</div>
+            <input class="input-field" type="password" value="••••••••">
+          </div>
+          <button class="btn-primary" onclick="loginAs()">Sign In Securely 🔐</button>
+        </div>
+        <div class="login-footer">
+          <p>🔒 End-to-end encrypted · GDPR compliant · v2.4.1</p>
+        </div>
+      </div>
+
+      <!-- ═══════════ HOME ═══════════ -->
+      <div id="page-home" class="page">
+        <div class="home-header">
+          <div class="home-header-top">
+            <div>
+              <div class="home-greeting">Thursday, 30 April 2026</div>
+              <div class="home-name">Hello, Marcus 👋</div>
+            </div>
+            <div class="home-avatar" onclick="showPage('profile')">👦</div>
+          </div>
+          <div class="alert-banner" onclick="showPage('menu')">
+            <div class="alert-banner-icon">⚠️</div>
+            <div class="alert-banner-text">
+              <h3>2 Allergens Detected in Today's Menu</h3>
+              <p>Dairy & Peanuts found — tap for safe alternatives</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="quick-tiles">
+            <div class="tile" onclick="showPage('menu')">
+              <div class="tile-icon">🍽️</div>
+              <div class="tile-label">Today's Menu</div>
+              <div class="tile-desc">2 alerts found</div>
+            </div>
+            <div class="tile" onclick="showPage('profile')">
+              <div class="tile-icon">👤</div>
+              <div class="tile-label">My Profile</div>
+              <div class="tile-desc">Health record</div>
+            </div>
+            <div class="tile" onclick="showPage('scan')">
+              <div class="tile-icon">📷</div>
+              <div class="tile-label">Scan Dish</div>
+              <div class="tile-desc">Instant check</div>
+            </div>
+            <div class="tile" onclick="showPage('history')">
+              <div class="tile-icon">📋</div>
+              <div class="tile-label">Meal History</div>
+              <div class="tile-desc">View past meals</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Recent Alerts</div>
+            <div class="alert-feed-item">
+              <div class="alert-dot dot-danger"></div>
+              <div class="alert-feed-text">
+                <div class="alert-feed-title">⚠️ Crème Brûlée contains Dairy</div>
+                <div class="alert-feed-time">Today · 12:03 PM · Nurse notified</div>
+              </div>
+            </div>
+            <div class="alert-feed-item">
+              <div class="alert-dot dot-warn"></div>
+              <div class="alert-feed-text">
+                <div class="alert-feed-title">🥜 Satay Sauce — Peanut trace</div>
+                <div class="alert-feed-time">Today · 11:48 AM · Caution flag</div>
+              </div>
+            </div>
+            <div class="alert-feed-item">
+              <div class="alert-dot dot-safe"></div>
+              <div class="alert-feed-text">
+                <div class="alert-feed-title">✅ Grilled Chicken — All clear</div>
+                <div class="alert-feed-time">Yesterday · 12:15 PM</div>
+              </div>
+            </div>
+            <div class="alert-feed-item">
+              <div class="alert-dot dot-danger"></div>
+              <div class="alert-feed-text">
+                <div class="alert-feed-title">🥛 Mac & Cheese — Dairy detected</div>
+                <div class="alert-feed-time">Yesterday · 11:50 AM · Parents notified</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PROFILE ═══════════ -->
+      <div id="page-profile" class="page">
+        <div class="profile-hero">
+          <div class="profile-avatar">👦</div>
+          <div class="profile-name">Marcus Édouard Koffi</div>
+          <div class="profile-id">ID: STU-2024-1847 · Class 8B</div>
+          <div class="profile-tags">
+            <span class="badge danger">⚠️ Dairy Allergy</span>
+            <span class="badge danger">⚠️ Peanut Allergy</span>
+            <span class="badge warn">⚡ EpiPen Required</span>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="card">
+            <div class="card-title">Personal Information</div>
+            <div class="info-row"><span class="info-key">Date of Birth</span><span class="info-val">14 March 2012 (14 yrs)</span></div>
+            <div class="info-row"><span class="info-key">Blood Type</span><span class="info-val">O+</span></div>
+            <div class="info-row"><span class="info-key">School</span><span class="info-val">Lycée International d'Abidjan</span></div>
+            <div class="info-row"><span class="info-key">Year</span><span class="info-val">Year 9 · Homeroom 8B</span></div>
+            <div class="info-row"><span class="info-key">Primary Language</span><span class="info-val">French / English</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Health Metrics</div>
+            <div class="metric-grid">
+              <div class="metric-box">
+                <div class="metric-val">52</div>
+                <div class="metric-unit">kg</div>
+                <div class="metric-label">Weight</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-val">163</div>
+                <div class="metric-unit">cm</div>
+                <div class="metric-label">Height</div>
+              </div>
+              <div class="metric-box">
+                <div class="metric-val">19.6</div>
+                <div class="metric-unit">kg/m²</div>
+                <div class="metric-label">BMI</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Diagnosed Allergies</div>
+            <div style="margin-bottom: 4px;">
+              <span class="allergy-chip critical">🥛 Dairy — Severe (Anaphylaxis)</span>
+              <span class="allergy-chip critical">🥜 Peanuts — Severe</span>
+              <span class="allergy-chip moderate">🌾 Gluten — Moderate</span>
+              <span class="allergy-chip moderate">🍳 Eggs — Mild–Moderate</span>
+              <span class="allergy-chip moderate">🌰 Tree Nuts — Moderate</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Intolerances</div>
+            <div style="margin-bottom: 4px;">
+              <span class="allergy-chip moderate">Lactose Intolerant</span>
+              <span class="allergy-chip moderate">Soy Sensitivity</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Medications</div>
+            <div class="med-item med-critical">
+              <div class="med-icon">💉</div>
+              <div>
+                <div class="med-name">EpiPen Jr (0.15 mg)</div>
+                <div class="med-dose">⚠️ CRITICAL — Always on person · Auto-injector</div>
+              </div>
+            </div>
+            <div class="med-item">
+              <div class="med-icon">💊</div>
+              <div>
+                <div class="med-name">Cetirizine 10mg</div>
+                <div class="med-dose">Daily antihistamine · After breakfast</div>
+              </div>
+            </div>
+            <div class="med-item">
+              <div class="med-icon">🧴</div>
+              <div>
+                <div class="med-name">Prednisolone (as needed)</div>
+                <div class="med-dose">5mg · Prescribed by Dr. Mensah</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Doctor & Nurse Notes</div>
+            <div style="background: var(--surface2); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--text); line-height: 1.6;">
+              <strong>Dr. Akosua Mensah (Allergist):</strong> Patient has confirmed IgE-mediated allergy to casein and peanut proteins. Anaphylaxis risk is high. EpiPen must be available at all times. Annual review scheduled April 2027.<br><br>
+              <strong>Nurse Fatou Diallo:</strong> Marcus is well-informed about his allergies. Parents have signed emergency protocol. Alert parents if any exposure suspected.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Next Checkup</div>
+            <div class="info-row"><span class="info-key">Allergist Review</span><span class="info-val">12 May 2026</span></div>
+            <div class="info-row"><span class="info-key">School Nurse</span><span class="info-val">Every Monday</span></div>
+            <div class="info-row"><span class="info-key">Blood Panel</span><span class="info-val">June 2026</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Emergency Contacts</div>
+            <div class="contact-item">
+              <div class="contact-avatar">👨</div>
+              <div><div class="contact-name">Jean-Paul Koffi</div><div class="contact-rel">Father · Primary</div></div>
+              <div class="contact-phone">📞 +225 07 XX XX</div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-avatar">👩</div>
+              <div><div class="contact-name">Ama Koffi</div><div class="contact-rel">Mother</div></div>
+              <div class="contact-phone">📞 +225 05 XX XX</div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-avatar">🩺</div>
+              <div><div class="contact-name">Dr. Akosua Mensah</div><div class="contact-rel">Allergist</div></div>
+              <div class="contact-phone">📞 +225 21 XX XX</div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-avatar">🚑</div>
+              <div><div class="contact-name">CHU Cocody Emergency</div><div class="contact-rel">Hospital</div></div>
+              <div class="contact-phone">📞 185</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ MENU ═══════════ -->
+      <div id="page-menu" class="page">
+        <div class="page-header">
+          <div class="page-title">🍽️ Canteen Menu</div>
+          <div class="page-sub">Personalised for Marcus · Allergens highlighted</div>
+        </div>
+        <div class="menu-date-bar">
+          <span class="menu-date-nav">‹</span>
+          <span class="menu-date">Thursday, 30 April 2026</span>
+          <span class="menu-date-nav">›</span>
+        </div>
+        <div class="page-content">
+          <div class="safe-summary">
+            <div class="safe-summary-icon">🛡️</div>
+            <div>
+              <h3>6 Safe Items Today</h3>
+              <p>2 dangerous · 2 caution · Tap any dish for full ingredients</p>
+            </div>
+          </div>
+
+          <div class="menu-section-title">🥗 Starters</div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🥗</div>
+            <div class="dish-info">
+              <div class="dish-name">Garden Salad</div>
+              <div class="dish-desc">Lettuce, tomato, cucumber, olive oil dressing</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span><span class="dish-tag safe">Vegan</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+          <div class="dish-card warn">
+            <div class="dish-emoji">🥚</div>
+            <div class="dish-info">
+              <div class="dish-name">Devilled Eggs</div>
+              <div class="dish-desc">Hard-boiled eggs, mayo, paprika, chives</div>
+              <div class="dish-tags"><span class="dish-tag warn">⚠️ Eggs</span><span class="dish-tag warn">⚠️ Soy (mayo)</span></div>
+            </div>
+            <div class="dish-status">⚠️</div>
+          </div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🍲</div>
+            <div class="dish-info">
+              <div class="dish-name">Vegetable Soup</div>
+              <div class="dish-desc">Carrot, potato, leek, vegetable broth — no dairy</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span><span class="dish-tag safe">GF</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+
+          <div class="menu-section-title">🍖 Main Courses</div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🍗</div>
+            <div class="dish-info">
+              <div class="dish-name">Grilled Chicken & Rice</div>
+              <div class="dish-desc">Herb-marinated chicken breast, steamed rice, roasted courgette</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span><span class="dish-tag safe">GF</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+          <div class="dish-card danger">
+            <div class="dish-emoji">🍝</div>
+            <div class="dish-info">
+              <div class="dish-name">Pasta Carbonara</div>
+              <div class="dish-desc">Spaghetti, smoked lardons, cream, parmesan, egg yolk</div>
+              <div class="dish-tags"><span class="dish-tag danger">🚫 Dairy</span><span class="dish-tag danger">🚫 Eggs</span><span class="dish-tag warn">⚠️ Gluten</span></div>
+            </div>
+            <div class="dish-status">🚫</div>
+          </div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🐟</div>
+            <div class="dish-info">
+              <div class="dish-name">Tilapia & Plantain</div>
+              <div class="dish-desc">Baked tilapia, fried sweet plantain, tomato sauce</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span><span class="dish-tag safe">Dairy-free</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+
+          <div class="menu-section-title">🍮 Desserts</div>
+          <div class="dish-card danger">
+            <div class="dish-emoji">🍮</div>
+            <div class="dish-info">
+              <div class="dish-name">Crème Brûlée</div>
+              <div class="dish-desc">Heavy cream, egg yolks, vanilla, cane sugar</div>
+              <div class="dish-tags"><span class="dish-tag danger">🚫 Dairy</span><span class="dish-tag danger">🚫 Eggs</span></div>
+            </div>
+            <div class="dish-status">🚫</div>
+          </div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🍉</div>
+            <div class="dish-info">
+              <div class="dish-name">Fresh Fruit Platter</div>
+              <div class="dish-desc">Seasonal fruits, watermelon, mango, pineapple</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span><span class="dish-tag safe">Vegan</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+
+          <div class="menu-section-title">🥤 Drinks</div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">💧</div>
+            <div class="dish-info">
+              <div class="dish-name">Still Water</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+          <div class="dish-card safe">
+            <div class="dish-emoji">🧃</div>
+            <div class="dish-info">
+              <div class="dish-name">Fresh Orange Juice</div>
+              <div class="dish-desc">100% pressed oranges, no additives</div>
+              <div class="dish-tags"><span class="dish-tag safe">✅ Safe</span></div>
+            </div>
+            <div class="dish-status">✅</div>
+          </div>
+          <div class="dish-card warn">
+            <div class="dish-emoji">🥛</div>
+            <div class="dish-info">
+              <div class="dish-name">Chocolate Milk</div>
+              <div class="dish-desc">Whole milk, cocoa, sugar</div>
+              <div class="dish-tags"><span class="dish-tag danger">🚫 Dairy</span></div>
+            </div>
+            <div class="dish-status">🚫</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ SCAN ═══════════ -->
+      <div id="page-scan" class="page">
+        <div class="page-header">
+          <div class="page-title">📷 Dish Scanner</div>
+          <div class="page-sub">Scan QR code or dish label instantly</div>
+        </div>
+        <div class="page-content">
+          <div class="scan-viewfinder" onclick="simulateScan()">
+            <div class="scan-corners"></div>
+            <div class="scan-line"></div>
+            <div class="scan-center">
+              <div style="font-size:40px">📷</div>
+              <p>Tap to simulate scan</p>
+            </div>
+          </div>
+
+          <div id="scan-result-danger" class="scan-result danger">
+            <div class="scan-result-header">
+              <div class="scan-result-icon">🚨</div>
+              <div>
+                <div class="scan-result-title">Crème Brûlée — DANGER</div>
+                <div class="scan-result-sub">Allergen detected for Marcus</div>
+              </div>
+            </div>
+            <div style="font-size:13px; color: var(--text2); line-height: 1.6;">
+              <strong>Detected:</strong> 🥛 Dairy (cream, parmesan) · 🍳 Eggs<br>
+              <strong>Risk level:</strong> <span style="color: var(--danger); font-weight: 700;">HIGH — Do not consume</span>
+            </div>
+            <button class="btn-alert" onclick="alertSent()">🔔 Alert Nurse &amp; Parents Now</button>
+          </div>
+
+          <div id="scan-result-safe" class="scan-result safe">
+            <div class="scan-result-header">
+              <div class="scan-result-icon">✅</div>
+              <div>
+                <div class="scan-result-title">Grilled Chicken — SAFE</div>
+                <div class="scan-result-sub">No allergens detected for Marcus</div>
+              </div>
+            </div>
+            <div style="font-size:13px; color: var(--text2);">Ingredients: Chicken breast, lemon, herbs, olive oil, rice — All clear!</div>
+            <button class="btn-safe" onclick="logMeal()">📝 Log This Meal</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Recent Scans</div>
+            <div class="scan-history-item">
+              <div class="scan-dish-icon">🍮</div>
+              <div style="flex:1"><div class="scan-dish-name">Crème Brûlée</div><div class="scan-dish-time">Today · 12:01 PM</div></div>
+              <span class="badge danger">🚫 Danger</span>
+            </div>
+            <div class="scan-history-item">
+              <div class="scan-dish-icon">🍗</div>
+              <div style="flex:1"><div class="scan-dish-name">Grilled Chicken</div><div class="scan-dish-time">Yesterday · 12:14 PM</div></div>
+              <span class="badge safe">✅ Safe</span>
+            </div>
+            <div class="scan-history-item">
+              <div class="scan-dish-icon">🍝</div>
+              <div style="flex:1"><div class="scan-dish-name">Pasta Carbonara</div><div class="scan-dish-time">Mon · 12:08 PM</div></div>
+              <span class="badge danger">🚫 Danger</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ HISTORY ═══════════ -->
+      <div id="page-history" class="page">
+        <div class="page-header">
+          <div class="page-title">📋 Meal History</div>
+          <div class="page-sub">Marcus Koffi · April 2026</div>
+        </div>
+        <div class="page-content">
+          <div class="card" style="padding-bottom: 8px;">
+            <div class="history-day">📅 Thursday 30 April</div>
+            <div class="history-meal"><div class="history-meal-time">12:03</div><div class="history-meal-name">🍗 Grilled Chicken & Rice</div><span class="badge safe">✅ Safe</span></div>
+            <div class="history-meal"><div class="history-meal-time">12:01</div><div class="history-meal-name">🍮 Crème Brûlée (not eaten)</div><span class="badge danger">🚫 Alert</span></div>
+            <div class="history-meal"><div class="history-meal-time">08:15</div><div class="history-meal-name">🥗 Garden Salad</div><span class="badge safe">✅ Safe</span></div>
+          </div>
+          <div class="card" style="padding-bottom: 8px;">
+            <div class="history-day">📅 Wednesday 29 April</div>
+            <div class="history-meal"><div class="history-meal-time">12:15</div><div class="history-meal-name">🐟 Tilapia & Plantain</div><span class="badge safe">✅ Safe</span></div>
+            <div class="history-meal"><div class="history-meal-time">08:10</div><div class="history-meal-name">🍉 Fresh Fruit Platter</div><span class="badge safe">✅ Safe</span></div>
+          </div>
+          <div class="card" style="padding-bottom: 8px;">
+            <div class="history-day">📅 Tuesday 28 April</div>
+            <div class="history-meal"><div class="history-meal-time">12:08</div><div class="history-meal-name">🍝 Pasta Carbonara (not eaten)</div><span class="badge danger">🚫 Alert</span></div>
+            <div class="history-meal"><div class="history-meal-time">12:05</div><div class="history-meal-name">🥗 Garden Salad</div><span class="badge safe">✅ Safe</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">⚠️ Alert Log</div>
+            <div class="alert-log-item">
+              <div class="alert-log-top">
+                <div class="alert-log-title">🍮 Crème Brûlée — Dairy + Eggs</div>
+                <div class="alert-log-time">Today 12:01</div>
+              </div>
+              <div class="alert-log-desc">Dish scanned at canteen. Dairy (cream) and egg allergens identified.</div>
+              <div class="alert-log-notif">✅ Nurse Diallo notified · ✅ Parents notified</div>
+            </div>
+            <div class="alert-log-item" style="border-left-color: var(--warn);">
+              <div class="alert-log-top">
+                <div class="alert-log-title">🥜 Satay Sauce — Peanut trace</div>
+                <div class="alert-log-time">Today 11:48</div>
+              </div>
+              <div class="alert-log-desc">Caution flag raised. Trace peanut in sauce manufacturing.</div>
+              <div class="alert-log-notif">⚠️ Caution flag · Nurse aware</div>
+            </div>
+            <div class="alert-log-item">
+              <div class="alert-log-top">
+                <div class="alert-log-title">🍝 Pasta Carbonara — Dairy</div>
+                <div class="alert-log-time">28 Apr 12:08</div>
+              </div>
+              <div class="alert-log-desc">Student did not consume dish. Alert raised proactively via menu check.</div>
+              <div class="alert-log-notif">✅ Nurse Diallo notified · ✅ Parents notified</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ NOTIFICATIONS ═══════════ -->
+      <div id="page-notif" class="page">
+        <div class="page-header">
+          <div class="page-title">🔔 Notifications</div>
+          <div class="page-sub">3 unread · Updated just now</div>
+        </div>
+        <div class="page-content">
+          <div class="card-title" style="padding: 0;">Today</div>
+          <div class="notif-item unread">
+            <div class="notif-icon">🚨</div>
+            <div>
+              <div class="notif-title">Allergen Alert — Crème Brûlée</div>
+              <div class="notif-body">Dairy and egg allergens detected in today's dessert. Marcus has been flagged and nurse notified.</div>
+              <div class="notif-time">12:01 PM · Allexiria Alert System</div>
+            </div>
+          </div>
+          <div class="notif-item unread">
+            <div class="notif-icon">⚠️</div>
+            <div>
+              <div class="notif-title">Caution — Satay Sauce</div>
+              <div class="notif-body">Peanut trace detected in today's lunch sauce. Caution flag raised.</div>
+              <div class="notif-time">11:48 AM · Menu Analysis</div>
+            </div>
+          </div>
+          <div class="notif-item unread">
+            <div class="notif-icon">💊</div>
+            <div>
+              <div class="notif-title">Medication Reminder</div>
+              <div class="notif-body">Don't forget your daily Cetirizine 10mg with breakfast.</div>
+              <div class="notif-time">08:00 AM · Health Reminder</div>
+            </div>
+          </div>
+
+          <div class="card-title" style="padding: 8px 0 0;">This Week</div>
+          <div class="notif-item">
+            <div class="notif-icon">🩺</div>
+            <div>
+              <div class="notif-title">Nurse Checkup — Monday</div>
+              <div class="notif-body">Scheduled weekly checkup with Nurse Diallo completed. All clear.</div>
+              <div class="notif-time">Mon 28 Apr · 09:15 AM</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon">📋</div>
+            <div>
+              <div class="notif-title">Weekly Safety Report Ready</div>
+              <div class="notif-body">Your allergen exposure report for W17 is ready to view.</div>
+              <div class="notif-time">Mon 28 Apr · 08:00 AM</div>
+            </div>
+          </div>
+
+          <div class="card-title" style="padding: 8px 0 0;">System</div>
+          <div class="notif-item">
+            <div class="notif-icon">🔄</div>
+            <div>
+              <div class="notif-title">Menu Updated for Tomorrow</div>
+              <div class="notif-body">Friday 1 May menu has been uploaded. Pre-analysis complete — 1 allergen flagged.</div>
+              <div class="notif-time">Today · 10:00 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ NURSE DASHBOARD ═══════════ -->
+      <div id="page-nurse" class="page">
+        <div class="nurse-header">
+          <div class="nurse-header-top">
+            <div>
+              <div class="nurse-role-badge">🩺 Nurse Dashboard</div>
+              <div class="nurse-name">Fatou Diallo, RN</div>
+              <div class="nurse-status">Lycée International d'Abidjan · On duty</div>
+            </div>
+            <div class="home-avatar">👩‍⚕️</div>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="nurse-stat-grid">
+            <div class="nurse-stat">
+              <div class="nurse-stat-val">247</div>
+              <div class="nurse-stat-label">Students Monitored</div>
+            </div>
+            <div class="nurse-stat alert-stat">
+              <div class="nurse-stat-val">4</div>
+              <div class="nurse-stat-label">Today's Alerts</div>
+            </div>
+            <div class="nurse-stat">
+              <div class="nurse-stat-val">38</div>
+              <div class="nurse-stat-label">Active Allergies</div>
+            </div>
+            <div class="nurse-stat">
+              <div class="nurse-stat-val">12</div>
+              <div class="nurse-stat-label">EpiPen Students</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Quick Actions</div>
+            <div class="quick-action-grid">
+              <div class="quick-action">
+                <div class="quick-action-icon">📞</div>
+                <div class="quick-action-label">Call Parent</div>
+              </div>
+              <div class="quick-action">
+                <div class="quick-action-icon">📄</div>
+                <div class="quick-action-label">Generate Report</div>
+              </div>
+              <div class="quick-action">
+                <div class="quick-action-icon">📢</div>
+                <div class="quick-action-label">Broadcast Alert</div>
+              </div>
+              <div class="quick-action">
+                <div class="quick-action-icon">📝</div>
+                <div class="quick-action-label">Log Incident</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Student Risk Overview</div>
+            <div class="risk-table-header"><span>Student</span><span style="text-align:center">Risk</span><span style="text-align:right">Action</span></div>
+            <div class="risk-row">
+              <div><div class="risk-student-name">Marcus Koffi</div><div class="risk-student-class">8B · Dairy, Peanuts</div></div>
+              <div class="risk-level high">HIGH</div>
+              <div class="risk-action"><span class="risk-action-btn">View</span></div>
+            </div>
+            <div class="risk-row">
+              <div><div class="risk-student-name">Amira Ben Salah</div><div class="risk-student-class">9A · Gluten, Eggs</div></div>
+              <div class="risk-level med">MED</div>
+              <div class="risk-action"><span class="risk-action-btn">View</span></div>
+            </div>
+            <div class="risk-row">
+              <div><div class="risk-student-name">Kofi Mensah Jr.</div><div class="risk-student-class">7C · Shellfish</div></div>
+              <div class="risk-level high">HIGH</div>
+              <div class="risk-action"><span class="risk-action-btn">View</span></div>
+            </div>
+            <div class="risk-row">
+              <div><div class="risk-student-name">Sophie Tremblay</div><div class="risk-student-class">10B · Soy</div></div>
+              <div class="risk-level low">LOW</div>
+              <div class="risk-action"><span class="risk-action-btn">View</span></div>
+            </div>
+            <div class="risk-row">
+              <div><div class="risk-student-name">Ibrahima Diallo</div><div class="risk-student-class">8A · Tree Nuts</div></div>
+              <div class="risk-level med">MED</div>
+              <div class="risk-action"><span class="risk-action-btn">View</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Today's Incident Log</div>
+            <div class="alert-log-item">
+              <div class="alert-log-top"><div class="alert-log-title">Marcus Koffi — Crème Brûlée</div><div class="alert-log-time">12:01</div></div>
+              <div class="alert-log-desc">Dairy allergen detected. Student did not consume. Parents notified.</div>
+              <div class="alert-log-notif">✅ Resolved · No EpiPen required</div>
+            </div>
+            <div class="alert-log-item" style="border-left-color: var(--warn);">
+              <div class="alert-log-top"><div class="alert-log-title">Amira Ben Salah — Bread Roll</div><div class="alert-log-time">11:55</div></div>
+              <div class="alert-log-desc">Gluten trace. Caution flag. Student informed.</div>
+              <div class="alert-log-notif">⚠️ Monitoring</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ SETTINGS ═══════════ -->
+      <div id="page-settings" class="page">
+        <div class="page-header">
+          <div class="page-title">⚙️ Settings</div>
+          <div class="page-sub">Allexiria v2.4.1</div>
+        </div>
+        <div class="page-content" style="padding-top: 8px;">
+
+          <div class="settings-section">
+            <div class="settings-section-title">Profile</div>
+            <div class="settings-item" style="border-radius: var(--radius-sm);">
+              <div class="settings-icon">👦</div>
+              <div class="settings-label">Marcus Édouard Koffi</div>
+              <div class="settings-value">STU-2024-1847</div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Notifications</div>
+            <div class="settings-item">
+              <div class="settings-icon">🚨</div>
+              <div class="settings-label">Allergen Alerts</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">💊</div>
+              <div class="settings-label">Medication Reminders</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">🍽️</div>
+              <div class="settings-label">Menu Updates</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">📢</div>
+              <div class="settings-label">Nurse Broadcasts</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">🔔</div>
+              <div class="settings-label">Parent Notifications</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Privacy & Data</div>
+            <div class="settings-item">
+              <div class="settings-icon">🔒</div>
+              <div class="settings-label">Share Data with Nurse</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">👨‍👩‍👧</div>
+              <div class="settings-label">Share Data with Parents</div>
+              <div class="toggle" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">📊</div>
+              <div class="settings-label">Anonymous Analytics</div>
+              <div class="toggle off" onclick="toggleSwitch(this)"></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">📋</div>
+              <div class="settings-label">Download My Data</div>
+              <div class="settings-value">›</div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Language</div>
+            <div class="settings-item">
+              <div class="settings-icon">🌍</div>
+              <div class="settings-label">Display Language</div>
+              <div class="settings-value">English</div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Account</div>
+            <div class="settings-item">
+              <div class="settings-icon">🔑</div>
+              <div class="settings-label">Change Password</div>
+              <div class="settings-value">›</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">🩺</div>
+              <div class="settings-label">Switch to Nurse View</div>
+              <div class="settings-value">›</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-icon">🚪</div>
+              <div class="settings-label" style="color: var(--danger);">Sign Out</div>
+              <div class="settings-value"></div>
+            </div>
+          </div>
+
+          <div style="text-align:center; padding: 8px; font-size: 11px; color: var(--text3);">
+            Allexiria v2.4.1 · 🔒 GDPR · End-to-end encrypted<br>© 2026 Allexiria Health Technologies
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen -->
+
+    <!-- Bottom Nav (hidden on login) -->
+    <div class="bottom-nav" id="bottom-nav" style="display:none;">
+      <div class="nav-item active" id="nav-home" onclick="showPage('home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Home</div>
+      </div>
+      <div class="nav-item" id="nav-menu" onclick="showPage('menu')">
+        <div class="nav-icon">🍽️</div>
+        <div class="nav-label">Menu</div>
+      </div>
+      <div class="nav-item" id="nav-scan" onclick="showPage('scan')">
+        <div class="nav-icon">📷</div>
+        <div class="nav-label">Scan</div>
+      </div>
+      <div class="nav-item" id="nav-notif" onclick="showPage('notif')">
+        <div class="nav-icon">🔔</div>
+        <div class="nav-label">Alerts</div>
+      </div>
+      <div class="nav-item" id="nav-settings" onclick="showPage('settings')">
+        <div class="nav-icon">⚙️</div>
+        <div class="nav-label">Settings</div>
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+  <div class="app-label">Allexiria · Healthcare Prototype</div>
+</div>
+
+<script>
+  let currentRole = 'student';
+  let scanState = 0;
+
+  function setRole(el, role) {
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentRole = role;
+  }
+
+  function loginAs() {
+    document.getElementById('page-login').classList.remove('active');
+    document.getElementById('bottom-nav').style.display = 'flex';
+    if (currentRole === 'nurse') {
+      showPage('nurse');
+      // adjust nav for nurse
+    } else {
+      showPage('home');
+    }
+  }
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+
+    // Nav highlight
+    const navMap = { home: 'nav-home', menu: 'nav-menu', scan: 'nav-scan', notif: 'nav-notif', settings: 'nav-settings', profile: 'nav-home', history: 'nav-home', nurse: 'nav-home' };
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navId = navMap[id];
+    if (navId) document.getElementById(navId)?.classList.add('active');
+
+    // Scroll top
+    const page = document.getElementById('page-' + id);
+    const content = page.querySelector('.page-content');
+    if (content) content.scrollTop = 0;
+  }
+
+  function simulateScan() {
+    scanState = (scanState + 1) % 3;
+    const d = document.getElementById('scan-result-danger');
+    const s = document.getElementById('scan-result-safe');
+    d.classList.remove('active');
+    s.classList.remove('active');
+    if (scanState === 1) d.classList.add('active');
+    else if (scanState === 2) s.classList.add('active');
+  }
+
+  function alertSent() {
+    alert('🚨 Alert sent!\n\n✅ Nurse Diallo notified\n✅ Parents (Jean-Paul & Ama Koffi) notified\n\nResponse expected within 2 minutes.');
+  }
+
+  function logMeal() {
+    alert('✅ Meal logged!\n\nGrilled Chicken & Rice has been added to Marcus\'s meal history for today at 12:03 PM.');
+  }
+
+  function toggleSwitch(el) {
+    el.classList.toggle('off');
+  }
+</script>
+</body>
+</html>
